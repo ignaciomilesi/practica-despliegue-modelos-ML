@@ -27,3 +27,6 @@ Por medio de Github actions, se van a activar tres workflows diferentes:
 - Reentrenamiento: va a utilizar Scikit learn para reentrenar un modelo de Machine Learning y generar nuevos modelos actualizados.
 
 ## Distribución de archivos
+
+## Notebook
+Se busca crear un modelo que pueda predecir el porcentaje de no supervivencia de un arbol dependiendo de diferentes factores
