@@ -30,3 +30,8 @@ Por medio de Github actions, se van a activar tres workflows diferentes:
 
 ## Notebook
 Se busca crear un modelo que pueda predecir el porcentaje de no supervivencia de un arbol dependiendo de diferentes factores
+
+Se encuentran dos archivos:
+-  [Data-analisis](notebook\data-analisis.ipynb): donde se analizaron las variables disponibles del dataset y se determino cuales son las verdaderamente relevamentes para el modelo.
+
+-  [Data-analisis](notebook\model.ipynb): donde se analizaron diferentes metodos de entrenamiento para determinar cual seria el mas conveniente y se realizo un primer modelo para realizar el primer despliegue.
