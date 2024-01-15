@@ -28,6 +28,16 @@ Por medio de Github actions, se van a activar tres workflows diferentes:
 
 ## Distribución de archivos
 
+- **.dvc/ :** configuraciones de DVC
+- .github/workflows/ : actions que se ejecutaran
+- api/ : API utilizando fast API
+- **datset/ :** dataset traqueado
+- **img :** imagenes para el readme
+- **model/ :** modelo generado
+- **notebooks/ :** notebooks donde se analizo el dataset y la generacion del modelo
+- src/ : archivos usados para reentrenamiento
+- utilities/ : archivos con utilidades especificas
+
 ## Notebook
 Se busca crear un modelo que pueda predecir el porcentaje de no supervivencia de un arbol dependiendo de diferentes factores
 
@@ -35,3 +45,34 @@ Se encuentran dos archivos:
 -  [Data-analisis](notebook\data-analisis.ipynb): donde se analizaron las variables disponibles del dataset y se determino cuales son las verdaderamente relevamentes para el modelo.
 
 -  [Model](notebook\model.ipynb): donde se analizaron diferentes metodos de entrenamiento y se realizo una busqueda de hiperparametros para determinar cual seria el mas conveniente. Ademas, se genero un primer modelo para realizar el primer despliegue.
+
+## Implementacion de DVC
+
+DVC se utiliza como gestor de versiones del dataset y de los modelos. Estos archivos suelen ser muy pesados, por lo que git no suele manejarlos adecuadamente. 
+
+DVC permite subir estos archivos pesados a un servicio de alojamiento (storage), para este caso Google Drive, y genera un archivo de trackeo, el cual es el que se sube a github. 
+
+El archivo de trackeo posee la ubicacion del archivo original y, ademas, lleva el control de versiones del mismo.
+
+![Arquitectura](img/esquema-dvc.png)
+<sup>Para este caso, tenemos el archivo model.pkl el cual se sube a un storage. el mismo es trackeado mediante el archivo model.pkl.dvc y es este archivo el que se sube al git</sup>
+
+Para la utilizacion del paquete ademas del:
+```
+pip install dvc
+```
+hay que instalar las dependencias adicionales segun el storage a utilizar, para este caso:
+```
+pip install dvc[gdrive]
+```
+Para usarla lo mejor es hacer un service accounts de Google. Siguiendo el tutorial de la documentacion de DVC se puede realizar sin problema:
+
+[DVC user guide - Google Drive - Service accounts](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive#using-service-accounts)
+
+<sub>*Nota: si bien puede puede usarse Google Drive sin la necesidad de realizar un service accounts, no es recomendable ya que, al momento de hacer el CI/CD, no se tendra acceso al dataset o al modelo*</sub>
+
+Por ultimo para implementar el DVC, seguir la documentacion de DVC:
+
+[DVC user guide - Google Drive](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive)
+
+Es importante agregar al .gitignore los archivos que se van a trackear (dataset, modelo, etc) para evitar que se suban al git y solo se suban los archivos de trackeo

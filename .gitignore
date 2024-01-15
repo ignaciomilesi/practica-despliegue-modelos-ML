@@ -1,2 +1,5 @@
 ent-data-analisis/
 ent-model-cre/
+ent-imp-dvc/
+*.csv
+*.pkl
