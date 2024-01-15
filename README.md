@@ -55,6 +55,7 @@ DVC permite subir estos archivos pesados a un servicio de alojamiento (storage),
 El archivo de trackeo posee la ubicacion del archivo original y, ademas, lleva el control de versiones del mismo.
 
 ![Arquitectura](img/esquema-dvc.png)
+
 <sup>Para este caso, tenemos el archivo model.pkl el cual se sube a un storage. el mismo es trackeado mediante el archivo model.pkl.dvc y es este archivo el que se sube al git</sup>
 
 Para la utilizacion del paquete ademas del:
@@ -69,7 +70,7 @@ Para usarla lo mejor es hacer un service accounts de Google. Siguiendo el tutori
 
 [DVC user guide - Google Drive - Service accounts](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive#using-service-accounts)
 
-<sub>*Nota: si bien puede puede usarse Google Drive sin la necesidad de realizar un service accounts, no es recomendable ya que, al momento de hacer el CI/CD, no se tendra acceso al dataset o al modelo*</sub>
+<sub>*Nota: si bien puede usarse Google Drive sin la necesidad de realizar un service accounts, no es recomendable ya que, al momento de hacer el CI/CD, no se tendra acceso al dataset o al modelo*</sub>
 
 Por ultimo para implementar el DVC, seguir la documentacion de DVC:
 
