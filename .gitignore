@@ -1,6 +1,4 @@
-ent-data-analisis/
-ent-model-cre/
-ent-imp-dvc/
+ent/
 *.csv
 *.pkl
 .dvc/dvc-key.json
