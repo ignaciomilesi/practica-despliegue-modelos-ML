@@ -34,4 +34,4 @@ Se busca crear un modelo que pueda predecir el porcentaje de no supervivencia de
 Se encuentran dos archivos:
 -  [Data-analisis](notebook\data-analisis.ipynb): donde se analizaron las variables disponibles del dataset y se determino cuales son las verdaderamente relevamentes para el modelo.
 
--  [Data-analisis](notebook\model.ipynb): donde se analizaron diferentes metodos de entrenamiento para determinar cual seria el mas conveniente y se realizo un primer modelo para realizar el primer despliegue.
+-  [Model](notebook\model.ipynb): donde se analizaron diferentes metodos de entrenamiento y se realizo una busqueda de hiperparametros para determinar cual seria el mas conveniente. Ademas, se genero un primer modelo para realizar el primer despliegue.
