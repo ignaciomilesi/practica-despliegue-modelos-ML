@@ -35,7 +35,7 @@ Por medio de Github actions, se van a activar tres workflows diferentes:
 - **img :** imagenes para el readme
 - **model/ :** modelo generado
 - **notebooks/ :** notebooks donde se analizo el dataset y la generacion del modelo
-- src/ : archivos usados para reentrenamiento
+- **src/ :** archivos usados para el CI-CD
 - utilities/ : archivos con utilidades especificas
 
 ## Notebook
