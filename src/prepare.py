@@ -1,4 +1,4 @@
-# creara un archivo data_Modif.csv a partir del dataset original 
+# crea un archivo: data_Modif.csv, a partir del dataset original 
 # que solo contenga las columnas utiles para la generacion del modelo
  
 import logging
