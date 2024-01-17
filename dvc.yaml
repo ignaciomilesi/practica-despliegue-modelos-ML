@@ -1,0 +1,10 @@
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    outs:
+    - dataset/data_Modif.csv
+    
+  training:
+    cmd: python src/train.py
+    deps:
+    - dataset/data_Modif.csv

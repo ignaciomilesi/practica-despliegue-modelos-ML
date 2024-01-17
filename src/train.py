@@ -1,16 +1,16 @@
 # actualiza el modelo. Se copia lo analizado en el notebook
-# se se busca la mejora solo el estimador GradientBoostingClassifier, 
-# ya que incluir mas impactaria en el tiempo de actualizacion
+# pero se utiliza LogisticRegression en ves de GradientBoostingClassifier por el tiempo de ejecucion
 
 import logging
+import warnings
 import pandas as pd
 import numpy as np
 
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.pipeline import Pipeline
-from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.model_selection import RandomizedSearchCV, cross_validate, train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import GridSearchCV, cross_validate, train_test_split
 
 import utils
 
@@ -44,27 +44,33 @@ col_trans = ColumnTransformer([
 
 estimador = Pipeline([
     ('manejo de columnas', col_trans),
-    ('core_model', GradientBoostingClassifier())
+    ('core_model', LogisticRegression())
 ])
 
 
 logging.info("Buscando mejores hiperparametros...")
 
 parametros = {
-    'core_model__n_estimators': range(100,200,10),
-    'core_model__max_depth' : range(2,11)
+    'core_model__solver': ['lbfgs', 'liblinear'],
+    'core_model__penalty': ['l1', 'l2', None],
+    'core_model__C': [0.001, 0.01, 0.1, 1.0],
+    'core_model__max_iter' : [100, 500, 1000]
 } 
 
-rand_est = RandomizedSearchCV(
+gridSearc = GridSearchCV(
     estimador,
     parametros,
-    n_iter= 10,
     cv=3,
     scoring="r2")
     
-rand_est.fit(X, y)
+warnings.filterwarnings('ignore')
+# para ignorar las advertencias y no ensuciar la salida, 
+# ya que avisa que hay convinacciones que no las tomara encuenta por no ser validas
 
-mejorEstimador = rand_est.best_estimator_
+gridSearc.fit(X, y)
+warnings.filterwarnings('default') #vuelvo a dejar que se vena las advertencias
+
+mejorEstimador = gridSearc.best_estimator_
 
 
 logging.info("Validacion cruzada del mejor estimador...")
@@ -91,6 +97,3 @@ validation_score = mejorEstimador.score(X_test, y_test)
 utils.save_simple_metrics_report(trainScore, testScore, validation_score, mejorEstimador)
 
 logging.info("Entrenamiento completado")
-
-breakpoint()
-
