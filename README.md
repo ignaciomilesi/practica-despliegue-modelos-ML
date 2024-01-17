@@ -82,9 +82,9 @@ Es importante agregar al .gitignore los archivos que se van a trackear (dataset,
 
 Se generaron 3 archivos dentro de la carpeta src, que son los encargados, al utilizar GitHub Action, del proceso de integración continua y despliegue continuo (CI / CD):
 
-- prepare.py: el encargado de preparar el dataset. Toma el dataset crudo, excluye las columnas que no son necesarias, elimina cuakquier fila que le falte algun dato y genera un nuevo archivo: data_Modif.csv. Este es el que se utilizara para la generacion del modelo
+- prepare.py: el encargado de preparar el dataset. Toma el dataset crudo, excluye las columnas que no son necesarias, elimina cualquier fila que le falte algun dato y genera un nuevo archivo: data_Modif.csv. Este es el que se utilizara para la generacion del modelo
 - train.py:  el encargado de general el modelo a partir del data_Modif.csv
-- utils.py: metodos axiliares, comos ser, la configuracion del logging, el guardado del nuevo modelo y la generacion de un reporte
+- utils.py: metodos auxiliares, como ser, la configuracion del logging, el guardado del nuevo modelo y la generacion de un reporte
 
 Para poder realizar la implementacion de los pipeline se genero el archivo dvc.yaml, el mismo contiene los pasos de ejecucion:
 
