@@ -59,13 +59,13 @@ El archivo de trackeo posee la ubicacion del archivo original y, ademas, lleva e
 <sup>Para este caso, tenemos el archivo model.pkl el cual se sube a un storage. el mismo es trackeado mediante el archivo model.pkl.dvc y es este archivo el que se sube al git</sup>
 
 Para la utilizacion del paquete ademas del:
-```
-pip install dvc
-```
+
+    pip install dvc
+
 hay que instalar las dependencias adicionales segun el storage a utilizar, para este caso:
-```
-pip install dvc[gdrive]
-```
+
+    pip install dvc[gdrive]
+
 Para usarla lo mejor es hacer un service accounts de Google. Siguiendo el tutorial de la documentacion de DVC se puede realizar sin problema:
 
 [DVC user guide - Google Drive - Service accounts](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive#using-service-accounts)
@@ -77,3 +77,43 @@ Por ultimo para implementar el DVC, seguir la documentacion de DVC:
 [DVC user guide - Google Drive](https://dvc.org/doc/user-guide/data-management/remote-storage/google-drive)
 
 Es importante agregar al .gitignore los archivos que se van a trackear (dataset, modelo, etc) para evitar que se suban al git y solo se suban los archivos de trackeo
+
+## Implementacion de pipeline para CI-CD
+
+Se generaron 3 archivos dentro de la carpeta src, que son los encargados, al utilizar GitHub Action, del proceso de integración continua y despliegue continuo (CI / CD):
+
+- prepare.py: el encargado de preparar el dataset. Toma el dataset crudo, excluye las columnas que no son necesarias, elimina cuakquier fila que le falte algun dato y genera un nuevo archivo: data_Modif.csv. Este es el que se utilizara para la generacion del modelo
+- train.py:  el encargado de general el modelo a partir del data_Modif.csv
+- utils.py: metodos axiliares, comos ser, la configuracion del logging, el guardado del nuevo modelo y la generacion de un reporte
+
+Para poder realizar la implementacion de los pipeline se genero el archivo dvc.yaml, el mismo contiene los pasos de ejecucion:
+
+- El primer paso es el prepare:
+    ```
+    prepare:
+    cmd: python src/prepare.py
+    outs:
+    - dataset/data_Modif.csv
+    ```
+Estamos diciendo que ejecute el archivo prepare.py y que la salida sera el data_Modif.csv
+
+- Como segundo paso es el training:
+    ```
+    training:
+    cmd: python src/train.py
+    deps:
+    - dataset/data_Modif.csv
+    ```
+Estamos diciendo que ejecute el archivo train.py y que como dependencia use el data_Modif.csv
+
+El dvc.yaml se ejecuta con el comando:
+
+    dvc repro -f
+
+y generara, debido a los pasos indicados, un modelo actualizado, el mismo no se actualizara en el repositorio, sino que posteriormente es necesario realizar:
+
+    dvc add model/model.pkl
+    dvc push
+
+Esto se hara cuando se realice la configuracion del GitHub Action
+
