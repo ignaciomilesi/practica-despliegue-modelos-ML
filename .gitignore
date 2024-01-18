@@ -3,4 +3,5 @@ ent-*/
 *.pkl
 .dvc/dvc-key.json
 src/__pycache__/
+api/__pycache__
 report.txt

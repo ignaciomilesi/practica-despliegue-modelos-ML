@@ -30,7 +30,7 @@ Por medio de Github actions, se van a activar tres workflows diferentes:
 
 - **.dvc/ :** configuraciones de DVC
 - .github/workflows/ : actions que se ejecutaran
-- api/ : API utilizando fast API
+- **api/ :** API para la realizacion de una prediccion
 - **datset/ :** dataset traqueado
 - **img :** imagenes para el readme
 - **model/ :** modelo generado
@@ -117,3 +117,7 @@ y generara, debido a los pasos indicados, un modelo actualizado, el mismo no se 
 
 Esto se hara cuando se realice la configuracion del GitHub Action
 
+
+## Implementacion de api
+
+pydantic es el que se encarga de la validacion de los datos y la creacion del objeto, las clase son heredadas de la clase BaseModel. si lo llegara a necesitar podria realizar validaciones propias

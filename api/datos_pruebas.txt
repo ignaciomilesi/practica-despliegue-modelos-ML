@@ -1,0 +1,12 @@
+{
+  "Species": "Acer saccharum",
+  "Light_ISF": 0.106,
+  "Soil": "Prunus serotina",
+  "Sterile": "Non-Sterile",
+  "Conspecific": "Heterospecific",
+  "AMF": 22.0,
+  "EMF": 0.0,
+  "Phenolics": -0.56,
+  "Lignin": 13.86,
+  "NSC": 12.15
+}
