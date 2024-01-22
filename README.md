@@ -120,4 +120,47 @@ Esto se hara cuando se realice la configuracion del GitHub Action
 
 ## Implementacion de api
 
-pydantic es el que se encarga de la validacion de los datos y la creacion del objeto, las clase son heredadas de la clase BaseModel. si lo llegara a necesitar podria realizar validaciones propias
+Se genera un api que permite realizar una prediccion al modelo generado. La misma es implementada con FastAPI.
+
+En el archivo main.py se genere la app con las solicitudes, para este caso solo se maneja una solicitud POST que recibe los valores y devuelve la prediccion.
+
+El archivo model.py es donde se crea las clases para manejar y validar los valores de entrada y salida. Se realiza con pydantic, esta libreria es el que se encarga de la validacion de los datos y la creacion del objeto, las clase son heredadas de la clase BaseModel. 
+```
+class PredictionRequest(BaseModel):
+    Species: str 
+    Light_ISF: float
+    Soil : str 
+    Sterile : str 
+    Conspecific : str 
+    AMF : float
+    EMF : float
+    Phenolics : float
+    Lignin : float
+    NSC : float
+```
+En cada clase se especifica el nombre de las claves (las que tiene que usar el modelo) y el tipo de dato que tiene que manejar, pydantic se encarga de realziar estas validaciones.
+
+Adicionalmente, para las clases categoricas, se definio una validacion personalizada para comprobar que los valores ingresados sean los correctos:
+
+```
+@validator('Species')
+    def categoria_especies(cls, especie):
+
+        especiesAdmitidas = ['Acer saccharum', 'Quercus alba', 'Quercus rubra', 'Prunus serotina']
+
+        if not (especie in especiesAdmitidas):
+            raise ValueError('Especie no admitida. Las especies admitidas son: ' + str(especiesAdmitidas))
+        
+        return especie
+```
+
+El archivo estimador.py es el encargado de cargar el modelo, transformar los datos (la logica de ambos metodos se encuentra en utils.py) y realizar la prediccion.
+
+La prueba en local se realiza mediante uvicorn:
+
+    api.main:app
+
+El comando es [ubicacion]:[nombreDeLaApp], la ubicacion se colocar reemplazando las " \ " por "." y el nombre de la app es la que se haya definido en el main.py ("**app** = FastAPI(docs_url='/')")
+
+Aca es donde se puede colocar valores para realizar una prueba en local:
+![Prueba en local](img/prueba-local.png)

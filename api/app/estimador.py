@@ -1,6 +1,7 @@
 from .model import PredictionRequest
 from .utils import get_model, transform_to_dataframe
 
+# cargo el modelo
 model = get_model()
 
 def getPrediction(request: PredictionRequest) -> float:
