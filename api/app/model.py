@@ -1,7 +1,7 @@
 # creo las clase de entrada y salida que utilizara la app
 
 from pydantic import BaseModel
-from pydantic import validator
+from pydantic import field_validator
 
 class PredictionRequest(BaseModel):
     Species: str 
@@ -15,7 +15,7 @@ class PredictionRequest(BaseModel):
     Lignin : float
     NSC : float
 
-    @validator('Species')
+    @field_validator('Species')
     def categoria_especies(cls, especie):
 
         especiesAdmitidas = ['Acer saccharum', 'Quercus alba', 'Quercus rubra', 'Prunus serotina']
@@ -26,7 +26,7 @@ class PredictionRequest(BaseModel):
         return especie
     
 
-    @validator('Soil')
+    @field_validator('Soil')
     def categoria_suelo(cls, suelo):
 
         sueloAdmitido = ['Prunus serotina', 'Quercus rubra', 'Acer rubrum', 
@@ -37,7 +37,7 @@ class PredictionRequest(BaseModel):
         
         return suelo
     
-    @validator('Sterile')
+    @field_validator('Sterile')
     def categoria_esteril(cls, esteril):
 
         esterilAdmitido = ['Non-Sterile', 'Sterile']
@@ -47,7 +47,7 @@ class PredictionRequest(BaseModel):
         
         return esteril
     
-    @validator('Conspecific')
+    @field_validator('Conspecific')
     def categoria_conespecificida(cls, conespecificidad):
 
         conespecificidadAdmitida = ['Heterospecific', 'Sterilized', 'Conspecific']
