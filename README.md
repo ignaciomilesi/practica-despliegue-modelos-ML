@@ -117,7 +117,6 @@ y generara, debido a los pasos indicados, un modelo actualizado, el mismo no se 
 
 Esto se hara cuando se realice la configuracion del GitHub Action
 
-
 ## Implementacion de api
 
 Se genera un api que permite realizar una prediccion al modelo generado. La misma es implementada con FastAPI.
@@ -164,3 +163,49 @@ El comando es [ubicacion]:[nombreDeLaApp], la ubicacion se colocar reemplazando 
 
 Aca es donde se puede colocar valores para realizar una prueba en local:
 ![Prueba en local](img/prueba-local.png)
+
+## Test de api
+
+Una mejor forma de testear la api es mediante el TestClient de FastAPI y pytest. Es necesario la instalacion de los paquetes httpx y pytest. Se crean los achivos __init__.py y test_main.py dentro de la carpeta de la api.
+
+En el test_main.py se carga la app:
+
+```
+from .main import app
+client = TestClient(app)
+```
+
+y se define las funciones de prueba:
+
+```
+def test_prediccion_positiva():
+    response = client.post('/v1/predic',
+                           json={
+                               "Species": "Acer saccharum",
+                                "Light_ISF": 0.106,
+                                "Soil": "Prunus serotina",
+                                "Sterile": "Non-Sterile",
+                                "Conspecific": "Heterospecific",
+                                "AMF": 22.0,
+                                "EMF": 0.0,
+                                "Phenolics": -0.56,
+                                "Lignin": 13.86,
+                                "NSC": 12.15
+                            })
+    
+    assert response.status_code == 200
+    assert response.json()['Event'] == 1.0
+```
+En este caso le digo que voy a probar la solicitud POST en '/v1/predic' con el json definido. Y en las dos ultimas lineas defino la respuesta que espero, para este caso un código de respuesta del servidor de 200 (ok) y el valor de la prediccion de 1.
+
+Se definio dos metodos de prueba, uno que espera una respuesta de 1 y otro que espera una respuesta de 0.
+
+Al ejecutar el archivo:
+
+```
+pytest api\test_main.py
+```
+Se ejecuta el test y, si ocurre lo esperado, se optiene lo siguiente:
+
+![Respuesta test](img/resultado-test.png)
+
