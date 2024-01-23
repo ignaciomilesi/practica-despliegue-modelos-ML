@@ -21,7 +21,7 @@ jobs:
       - name: Instalando dependencias
         run: |
           pip install dvc[gdrive]
-          pip install -r requirements_test.txt
+          pip install -r api/requirements-app-test.txt
           pip install --upgrade pyopenssl
 
       - name: Traer el modelo y testeando la API
