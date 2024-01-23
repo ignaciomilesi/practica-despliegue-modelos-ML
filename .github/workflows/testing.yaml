@@ -27,4 +27,4 @@ jobs:
       - name: Traer el modelo y testeando la API
         run: |
           dvc pull model/model.pkl -r myremote
-          pytest test.py
+          pytest api/test_main.py
