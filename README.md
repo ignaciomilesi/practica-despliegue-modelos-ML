@@ -29,7 +29,7 @@ Por medio de Github actions, se van a activar tres workflows diferentes:
 ## Distribución de archivos
 
 - **.dvc/ :** configuraciones de DVC
-- .github/workflows/ : actions que se ejecutaran
+- **.github/workflows/ :** archivos que ejecutaran las acciones en GitHub Action
 - **api/ :** API para la realizacion de una prediccion
 - **datset/ :** dataset traqueado
 - **img :** imagenes para el readme
@@ -209,3 +209,82 @@ Se ejecuta el test y, si ocurre lo esperado, se optiene lo siguiente:
 
 ![Respuesta test](img/resultado-test.png)
 
+## Workflow para el testeo de la api
+
+GitHub Actions permite Automatizar y ejecutar flujos de trabajo de directamente desde el repositorio de GitHub. Se debe crear un archivo YAML para definir la configuración de flujo de trabajo, este archivo debe ser guardado la ubicacion .github/workflows del repositorio para que pueda ser ejecutado.
+
+YAML es un lenguaje de serialización de datos que las personas pueden comprender y suele utilizarse en el diseño de archivos de configuración. Es un lenguaje de programación popular porque está diseñado para que sea fácil de leer y entender, ya que, utilizan la sangría al estilo Python (aunque no admite tabulacion) para determinar la estructura e indicar la incorporación de un elemento de código dentro de otro.
+
+Analizando el testing.yaml generado para la configuracion de este workflow:
+
+```
+name: Testeo de API
+```
+Es el nombre del workflow y es el que aparecera en la pestaña "Actions" del repositorio 
+.
+
+```
+on: 
+  push:
+    branches:
+      - workflow_testing_api
+```
+Con `on` defino que eventos hacen que se ejecute el workflow. Para este caso el evento que lo desata es el realizar un `push` en la rama (`branches`) con nombre `workflow_testing_api`
+.
+```
+jobs:
+  testing-api:
+```
+Con `jobs` le pongo nombre a un grupo de acciones con un solo objetivo, es decir, defino los 'trabajos'. Para este caso se definio un solo trabajo denominado testing-api
+.
+```
+    runs-on: ubuntu-latest
+    env:
+      GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
+```
+Con `runs-on` en que entorno se va a desplegar el workflow, aca se definio que en ubuntu. Mientras que con `env` defino las variables de entorno (las que se pueden utilizar en caulquier parte del workflow). 
+
+GDRIVE_CREDENTIALS_DATA es la variable que contiene la key que utiliza DVC para acceder al model y al dataset (tiene que ser es nombre sino no la encuentra DVC). La key, para que no quede su informacion publica por motivos de seguridad, debe cargarse mediante Repository secrets de GitHub, los mismos se crean en `settings -> secrets and variables -> actions` 
+
+![Github setting ubicacion](img/github-setting.png)
+![Github Repository secrets ubicacion](img/github-repo-secrets.png)
+
+y en Repository secrets, al crear un nuevo secrets vuelco el contenido de la key
+![Github new secret](img/github-new-secrets.png)
+
+Para usar el secret durante el workflow, simplemente coloco: `${{ secrets.YOUR_SECRET_NAME }}`
+.
+```
+    steps:
+```
+Con `steps` defino las acciones y el orden a realizarlas. Podria definir todo el workflow en un solo paso pero separalo todo en varios pasos mas pequeños facilita el conocer en que estado se encuentra el workflow al momento de la ejecucion y, en caso de un error, en donde se ocaciono.
+
+```
+      - name: Acceso al repositorio
+        uses: actions/checkout@v3
+```
+Los pasos se definen con `name` y con `uses` indico que realice lo indicado en actions/checkout (repositorio de tercero en github). 
+
+Es decir, con `uses` puedo utilizar lo que hayan hechos otros usuarios, workflow probados y optimisados, para GitHub Action. De esta forma me ahorro la configuracion de elementos complejos. 
+
+El actions/checkout@3 verifica el repositorio y lo descarga al ejecutor, lo que permite utilizarlo durante la ejecucion. El @3 indica la version.
+
+Con `run` define las acciones, en su orden, a realizar (como si los realizara desde el cmd). A continuacion el resto del yaml:
+```
+      - name: Creando y activando un entorno virtual
+        run: |
+          pip3 install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+        
+      - name: Instalando dependencias
+        run: |
+          pip install dvc[gdrive]
+          pip install -r api/requirements-app-test.txt
+          pip install --upgrade pyopenssl
+
+      - name: Traer el modelo y testeando la API
+        run: |
+          dvc pull model/model.pkl -r myremote
+          pytest api/test_main.py
+```
