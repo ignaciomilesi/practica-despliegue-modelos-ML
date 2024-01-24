@@ -15,7 +15,7 @@ jobs:
   continuous-training:
     runs-on: ubuntu-latest
     env:
-      GDRIVE_CREDENTIALS_DATA: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+      GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
       REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Acceso al repositorio
@@ -58,15 +58,13 @@ jobs:
            dvc add model/model.pkl
            dvc push
       
-      - name: Hacer commit de los cambios en el archivo .dvc 
+      - name: Commit y push de los cambios en el archivo .dvc 
         run: |
           git config --local user.email "ignacio_m_16@hotmail.com"
           git config --local user.name "github-actions[bot]"
           git add model/model.pkl.dvc
           git commit -m "Updating model serialization"
-      
-      # Push de los cambios al repositorio
-      - uses: ad-m/github-push-action@master
+      - uses: ad-m/github-push-action@master # este es el que se encarga de hacer el push
         with:
             github_token: ${{ secrets.GITHUB_TOKEN }}
             branch: ${{ github.ref }}
