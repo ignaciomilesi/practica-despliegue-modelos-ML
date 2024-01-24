@@ -211,33 +211,39 @@ Se ejecuta el test y, si ocurre lo esperado, se optiene lo siguiente:
 
 ## Workflow para el testeo de la api
 
-GitHub Actions permite Automatizar y ejecutar flujos de trabajo de directamente desde el repositorio de GitHub. Se debe crear un archivo YAML para definir la configuración de flujo de trabajo, este archivo debe ser guardado la ubicacion .github/workflows del repositorio para que pueda ser ejecutado.
+GitHub Actions permite Automatizar y ejecutar flujos de trabajo directamente desde el repositorio de GitHub. Se debe crear un archivo YAML para definir la configuración de flujo de trabajo, este archivo debe ser guardado en la ubicacion .github/workflows del repositorio para que pueda ser ejecutado.
 
-YAML es un lenguaje de serialización de datos que las personas pueden comprender y suele utilizarse en el diseño de archivos de configuración. Es un lenguaje de programación popular porque está diseñado para que sea fácil de leer y entender, ya que, utilizan la sangría al estilo Python (aunque no admite tabulacion) para determinar la estructura e indicar la incorporación de un elemento de código dentro de otro.
+YAML es un lenguaje de serialización de datos y suele utilizarse en el diseño de archivos de configuración. Es un lenguaje de programación popular porque está diseñado para que sea fácil de leer y entender, ya que, utilizan la sangría al estilo Python (aunque no admite tabulacion) para determinar la estructura e indicar la incorporación de un elemento de código dentro de otro.
 
 Analizando el testing.yaml generado para la configuracion de este workflow:
 
-```
+---
+```yaml
 name: Testeo de API
 ```
 Es el nombre del workflow y es el que aparecera en la pestaña "Actions" del repositorio 
-.
 
-```
+---
+
+```yaml
 on: 
   push:
     branches:
       - workflow_testing_api
 ```
 Con `on` defino que eventos hacen que se ejecute el workflow. Para este caso el evento que lo desata es el realizar un `push` en la rama (`branches`) con nombre `workflow_testing_api`
-.
-```
+
+---
+
+```yaml
 jobs:
   testing-api:
 ```
 Con `jobs` le pongo nombre a un grupo de acciones con un solo objetivo, es decir, defino los 'trabajos'. Para este caso se definio un solo trabajo denominado testing-api
-.
-```
+
+---
+
+```yaml
     runs-on: ubuntu-latest
     env:
       GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
@@ -253,13 +259,17 @@ y en Repository secrets, al crear un nuevo secrets vuelco el contenido de la key
 ![Github new secret](img/github-new-secrets.png)
 
 Para usar el secret durante el workflow, simplemente coloco: `${{ secrets.YOUR_SECRET_NAME }}`
-.
-```
+
+---
+
+```yaml
     steps:
 ```
 Con `steps` defino las acciones y el orden a realizarlas. Podria definir todo el workflow en un solo paso pero separalo todo en varios pasos mas pequeños facilita el conocer en que estado se encuentra el workflow al momento de la ejecucion y, en caso de un error, en donde se ocaciono.
 
-```
+---
+
+```yaml
       - name: Acceso al repositorio
         uses: actions/checkout@v3
 ```
@@ -269,8 +279,10 @@ Es decir, con `uses` puedo utilizar lo que hayan hechos otros usuarios, workflow
 
 El actions/checkout@3 verifica el repositorio y lo descarga al ejecutor, lo que permite utilizarlo durante la ejecucion. El @3 indica la version.
 
+---
+
 Con `run` defino las acciones, en su orden, a realizar (como si los realizara desde el cmd). A continuacion el resto del yaml, el cual esta dividido en 3 pasos mas:
-```
+```yaml
       - name: Creando y activando un entorno virtual
         run: |
           pip3 install virtualenv
