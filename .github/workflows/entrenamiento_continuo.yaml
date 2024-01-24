@@ -64,11 +64,12 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add model/model.pkl.dvc
           git commit -m "Updating model serialization"
-          
+          git push
 
       - uses: iterative/setup-cml@v1
       - name: Agregado comentario con el reporte
         run: |
+          git pull
           cat report.txt >> report.md 
           cml comment create report.md
-          git push
+         
