@@ -60,6 +60,8 @@ jobs:
       
       - name: Commit y push de los cambios en el archivo .dvc 
       - uses: iterative/setup-cml@v1
+
+      - name: comentario y commit
         run: |
           cat report.txt >> report.md 
           cml comment create report.md
