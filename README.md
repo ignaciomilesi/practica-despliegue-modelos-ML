@@ -269,7 +269,7 @@ Es decir, con `uses` puedo utilizar lo que hayan hechos otros usuarios, workflow
 
 El actions/checkout@3 verifica el repositorio y lo descarga al ejecutor, lo que permite utilizarlo durante la ejecucion. El @3 indica la version.
 
-Con `run` define las acciones, en su orden, a realizar (como si los realizara desde el cmd). A continuacion el resto del yaml:
+Con `run` defino las acciones, en su orden, a realizar (como si los realizara desde el cmd). A continuacion el resto del yaml, el cual esta dividido en 3 pasos mas:
 ```
       - name: Creando y activando un entorno virtual
         run: |
@@ -288,3 +288,9 @@ Con `run` define las acciones, en su orden, a realizar (como si los realizara de
           dvc pull model/model.pkl -r myremote
           pytest api/test_main.py
 ```
+
+Como se indico anteriormente, al realizar un `push` en la rama, comienza a ejecutarse el workflow. Llendo a la pestaña Action puede verse el estado:
+
+![Github actinos](img/github-actions.png)
+
+Aca se puede ver, a la izquierda, "Testing API" que es el `name` que se habia colocado y 3 corridas, dos que fracazaron (por error en el yaml) y una que fue satisfactoria. Las corridas se muestran con el commit con que fueron realizadas
