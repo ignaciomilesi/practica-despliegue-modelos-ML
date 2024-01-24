@@ -58,7 +58,6 @@ jobs:
            dvc add model/model.pkl
            dvc push
       
-      - name: Commit y push de los cambios en el archivo .dvc 
       - uses: iterative/setup-cml@v1
 
       - name: comentario y commit
@@ -70,6 +69,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add model/model.pkl.dvc
           git commit -m "Updating model serialization"
+
       - uses: ad-m/github-push-action@master # este es el que se encarga de hacer el push
         with:
             github_token: ${{ secrets.GITHUB_TOKEN }}
