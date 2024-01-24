@@ -59,7 +59,11 @@ jobs:
            dvc push
       
       - name: Commit y push de los cambios en el archivo .dvc 
+      - uses: iterative/setup-cml@v1
         run: |
+          cat report.txt >> report.md 
+          cml comment create report.md
+        
           git config --local user.email "ignacio_m_16@hotmail.com"
           git config --local user.name "github-actions[bot]"
           git add model/model.pkl.dvc
@@ -69,8 +73,4 @@ jobs:
             github_token: ${{ secrets.GITHUB_TOKEN }}
             branch: ${{ github.ref }}
 
-      - uses: iterative/setup-cml@v1
-      - name: Agregado comentario con el reporte
-        run: |
-          cat report.txt >> report.md 
-          cml comment create report.md
+      
