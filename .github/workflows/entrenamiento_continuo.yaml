@@ -64,14 +64,11 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git add model/model.pkl.dvc
           git commit -m "Updating model serialization"
-          git push
-      #- uses: ad-m/github-push-action@master # este es el que se encarga de hacer el push
-      #  with:
-      #      github_token: ${{ secrets.GITHUB_TOKEN }}
-      #      branch: ${{ github.ref }}
+          
 
       - uses: iterative/setup-cml@v1
       - name: Agregado comentario con el reporte
         run: |
           cat report.txt >> report.md 
           cml comment create report.md
+          git push
