@@ -78,7 +78,7 @@ Por ultimo para implementar el DVC, seguir la documentacion de DVC:
 
 Es importante agregar al .gitignore los archivos que se van a trackear (dataset, modelo, etc) para evitar que se suban al git y solo se suban los archivos de trackeo
 
-## Implementacion de pipeline para CI-CD <a name="imp-CI-CD"></a>
+## Implementacion de pipeline para CI-CD
 
 Se generaron 3 archivos dentro de la carpeta src, que son los encargados, al utilizar GitHub Action, del proceso de integración continua y despliegue continuo (CI / CD):
 
@@ -349,7 +349,7 @@ El node es necesario actualizar ya que de lo contrario daria error mas adelante 
            echo "Entrenamiento completo"
 
 ```
-Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo dvc.yaml que, para este caso,utiliza lo implementado en la carpeta src.Ver: [Implementacion de pipeline para CI-CD](#implementacion-de-pipeline-para-ci-cd-)
+Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo dvc.yaml que, para este caso,utiliza lo implementado en la carpeta src. Ver: [Implementacion de pipeline para CI-CD](#implementacion-de-pipeline-para-ci-cd-)
 
 ---
 ```yaml
@@ -363,4 +363,12 @@ Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo
 
 `cat report.txt >> report.md` transforma el txt en un archivo de markdown
 
-`cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md` creo el comentario. Por default el comentario se creara en el commit que desencadeno el workflow, que en este caso no es el mismo en el que se actualizo el modelo (eso se realiza en un commit posterior, generado por este workflow). Por ello es necesario indicar `--target=commit/$(git log  --pretty=format:'%h' -1)`, con el `git log ...` obtengo el hash del ultimo commit generado, el cual contiene el modelo actualizado y con el `--target=commit/` le indico que el comentario lo realice en ese commit
+`cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md` creo el comentario. 
+
+Por default el comentario se creara en el commit que desencadeno el workflow, que en este caso no es el mismo en el que se actualizo el modelo (eso se realiza en un commit posterior, generado por este workflow).
+
+Por ello es necesario indicar `--target=commit/$(git log  --pretty=format:'%h' -1)`, con el `git log ...` obtengo el hash del ultimo commit generado, el cual contiene el modelo actualizado y con el `--target=commit/` le indico que el comentario lo realice en ese commit
+
+El commit donde se actualiza el modelo, con el comentario indicando el reporte del mismo se de la siguiente manera:
+
+![Commit con el modelo actualizado](img/comit-modelo-actualizado.png)
