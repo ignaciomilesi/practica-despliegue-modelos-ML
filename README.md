@@ -339,7 +339,7 @@ El boton solo aparecere cuando el archivo de configuracion YAML se encuentre en 
         with:
           node-version: '16'
 ```
-El node es necesario actualizar ya que de lo contrario daria error mas adelante en el workflow (en el `uses: iterative/setup-cml@v1`). Su actualizacion o no hay que evaluarlo dependiendo de lo que se valla a utilizar en el workflow. Ver: [Implementacion de pipeline para CI-CD](#imp-CI-CD)
+El node es necesario actualizar ya que de lo contrario daria error mas adelante en el workflow (en el `uses: iterative/setup-cml@v1`). Su actualizacion o no hay que evaluarlo dependiendo de lo que se valla a utilizar en el workflow. 
 
 ---
 ```yaml
@@ -349,7 +349,7 @@ El node es necesario actualizar ya que de lo contrario daria error mas adelante 
            echo "Entrenamiento completo"
 
 ```
-Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo dvc.yaml que, para este caso,utiliza lo implementado en la carpeta src.
+Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo dvc.yaml que, para este caso,utiliza lo implementado en la carpeta src.Ver: [Implementacion de pipeline para CI-CD](#implementacion-de-pipeline-para-ci-cd-)
 
 ---
 ```yaml
