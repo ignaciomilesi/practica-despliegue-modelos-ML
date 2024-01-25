@@ -69,7 +69,6 @@ jobs:
       - uses: iterative/setup-cml@v1
       - name: Agregado comentario con el reporte
         run: |
-          git pull
           cat report.txt >> report.md 
-          cml comment create report.md
+          cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md
          
