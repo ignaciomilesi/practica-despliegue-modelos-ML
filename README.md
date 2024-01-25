@@ -78,7 +78,7 @@ Por ultimo para implementar el DVC, seguir la documentacion de DVC:
 
 Es importante agregar al .gitignore los archivos que se van a trackear (dataset, modelo, etc) para evitar que se suban al git y solo se suban los archivos de trackeo
 
-## Implementacion de pipeline para CI-CD
+## Implementacion de pipeline para CI-CD <a name="imp-CI-CD"></a>
 
 Se generaron 3 archivos dentro de la carpeta src, que son los encargados, al utilizar GitHub Action, del proceso de integración continua y despliegue continuo (CI / CD):
 
@@ -306,3 +306,61 @@ Como se indico anteriormente, al realizar un `push` en la rama, comienza a ejecu
 ![Github actinos](img/github-actions.png)
 
 Aca se puede ver, a la izquierda, "Testing API" que es el `name` que se habia colocado y 3 corridas, dos que fracazaron (por error en el yaml) y una que fue satisfactoria. Las corridas se muestran con el commit con que fueron realizadas
+
+## Workflow para el entrenamiento continuo
+
+La estructura es la misma que el workflow para el testeo de API, con un par de particularidades:
+
+---
+```yaml
+on:
+  push:
+    branches:
+      - workflow_entrenamiento_continuo
+  #schedule:
+  #  - cron: '0 */6 * * *'
+  workflow_dispatch:
+     reason:
+        description: Motivo de la corrida
+        default: Actualizar modelo
+```
+`schedule` se utiliza para que la corrida sea programada, en este caso se indica que se debe ejecutar cada 6 horas (se encuentra como comentario ya que es un modelo de ejemplo), es posible indicar, por ejemplo, que se ejecute cada cierta cantidad de dias o que sea todos los martes a las 09Hs, entre otras configuraciones
+
+`workflow_dispatch` permite la ejecucion manual y, para este caso, se definio que al momento de ejecutarlo se indique el motivo de la corrida. El boton para ejecutar la corrida aparecera en la pestaña 'action' y seleccionando el workflow correspondiente:
+
+![Github workflow-dispatch](img/git-workflow-dispatch.png)
+
+El boton solo aparecere cuando el archivo de configuracion YAML se encuentre en la rama main
+
+---
+```yaml
+    - name: Actualizar a Node16
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+```
+El node es necesario actualizar ya que de lo contrario daria error mas adelante en el workflow (en el `uses: iterative/setup-cml@v1`). Su actualizacion o no hay que evaluarlo dependiendo de lo que se valla a utilizar en el workflow. Ver: [Implementacion de pipeline para CI-CD](#imp-CI-CD)
+
+---
+```yaml
+    - name: Actualizando Train model
+        run: |
+           dvc repro -f 
+           echo "Entrenamiento completo"
+
+```
+Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo dvc.yaml que, para este caso,utiliza lo implementado en la carpeta src.
+
+---
+```yaml
+      - uses: iterative/setup-cml@v1
+      - name: Agregado comentario con el reporte
+        run: |
+          cat report.txt >> report.md 
+          cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md
+```
+`iterative/setup-cml@v1` es lo que permite agregar un comentario al commit (en este caso el reporte generado del modelo creado).
+
+`cat report.txt >> report.md` transforma el txt en un archivo de markdown
+
+`cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md` creo el comentario. Por default el comentario se creara en el commit que desencadeno el workflow, que en este caso no es el mismo en el que se actualizo el modelo (eso se realiza en un commit posterior, generado por este workflow). Por ello es necesario indicar `--target=commit/$(git log  --pretty=format:'%h' -1)`, con el `git log ...` obtengo el hash del ultimo commit generado, el cual contiene el modelo actualizado y con el `--target=commit/` le indico que el comentario lo realice en ese commit

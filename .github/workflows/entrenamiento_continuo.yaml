@@ -6,11 +6,10 @@ on:
   #schedule:
   #  - cron: '0 */6 * * *'
   workflow_dispatch:
-    inputs:
-      reason:
+     reason:
         description: Motivo de la corrida
-        required: false
-        default: running CT
+        default: Actualizar modelo
+
 jobs:
   continuous-training:
     runs-on: ubuntu-latest
