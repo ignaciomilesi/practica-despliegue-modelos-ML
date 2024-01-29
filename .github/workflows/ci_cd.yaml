@@ -17,7 +17,7 @@ jobs:
   ci_cd:
     runs-on: ubuntu-latest
     env:
-      GDRIVE_CREDENTIALS_DATA: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+      GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
     steps:
       - name: Acceso al repositorio
         uses: actions/checkout@v3
