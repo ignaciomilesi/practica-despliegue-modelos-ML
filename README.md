@@ -230,8 +230,9 @@ on:
   push:
     branches:
       - workflow_testing_api
+      - main
 ```
-Con `on` defino que eventos hacen que se ejecute el workflow. Para este caso el evento que lo desata es el realizar un `push` en la rama (`branches`) con nombre `workflow_testing_api`
+Con `on` defino que eventos hacen que se ejecute el workflow. Para este caso, el evento que lo desata es el realizar un `push` en la rama (`branches`) con nombre `workflow_testing_api` o en la rama `main`
 
 ---
 
@@ -320,9 +321,10 @@ on:
   #schedule:
   #  - cron: '0 */6 * * *'
   workflow_dispatch:
-     reason:
-        description: Motivo de la corrida
-        default: Actualizar modelo
+      input:
+        reason:
+          description: Motivo de la corrida
+          default: Actualizar modelo
 ```
 `schedule` se utiliza para que la corrida sea programada, en este caso se indica que se debe ejecutar cada 6 horas (se encuentra como comentario ya que es un modelo de ejemplo), es posible indicar, por ejemplo, que se ejecute cada cierta cantidad de dias o que sea todos los martes a las 09Hs, entre otras configuraciones
 
@@ -369,6 +371,10 @@ Por default el comentario se creara en el commit que desencadeno el workflow, qu
 
 Por ello es necesario indicar `--target=commit/$(git log  --pretty=format:'%h' -1)`, con el `git log ...` obtengo el hash del ultimo commit generado, el cual contiene el modelo actualizado y con el `--target=commit/` le indico que el comentario lo realice en ese commit
 
-El commit donde se actualiza el modelo, con el comentario indicando el reporte del mismo se de la siguiente manera:
+El commit donde se actualiza el modelo con el comentario indicando el reporte del mismo se ve de la siguiente manera:
 
 ![Commit con el modelo actualizado](img/comit-modelo-actualizado.png)
+
+
+
+Hay que tener encuenta un par de cosas: * Se necesita cuenta de Docker HUB, ya que la docker image se carga ahi y desde ese lugar se sube a Koyeb. Y se necesita crear los ${{ secrets.DOCKERHUB\_USERNAME }} y ${{ secrets.DOCKERHUB\_TOKEN }} con los datos de la cuenta * Se necesita cuenta en Koyeb y generar el ${{ secrets.KOYEB\_TOKEN }} con el token de la cuenta * En la ultima linea, el app\_name/service\_name, son los nombres del servicio creado en Koyeb

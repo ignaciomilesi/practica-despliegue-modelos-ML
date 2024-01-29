@@ -3,10 +3,12 @@ on:
   push:
     branches:
       - workflow_entrenamiento_continuo
+      - main
   #schedule:
   #  - cron: '0 */6 * * *'
   workflow_dispatch:
-     reason:
+    inputs:
+      reason:
         description: Motivo de la corrida
         default: Actualizar modelo
 
