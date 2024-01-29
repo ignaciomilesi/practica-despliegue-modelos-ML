@@ -45,7 +45,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ignaciomilesi / practica-despliegue-modelos-ml:latest
+          tags: ignaciomilesi/practica-despliegue-modelos-ml:latest
       
       #- name: Cargamos y configuramos el CLI de Koyeb
       #  uses: koyeb-community/install-koyeb-cli@v2
