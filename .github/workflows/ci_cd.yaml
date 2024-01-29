@@ -28,11 +28,11 @@ jobs:
           virtualenv venv
           source venv/bin/activate
       
-      #- name: Cargando el modelo
-      #  run: | 
-      #    pip install dvc[gdrive]
-      #    pip install --upgrade pyopenssl
-      #    dvc pull model/model.pkl.dvc -r myremote
+      - name: Cargando el modelo
+        run: | 
+          pip install dvc[gdrive]
+          pip install --upgrade pyopenssl
+          dvc pull model/model.pkl.dvc -r myremote
       
       - name: Docker login
         uses: docker/login-action@v3
