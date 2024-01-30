@@ -385,9 +385,7 @@ Es el encargado de tomar el nuevo modelo y desplegar el servicio. Para ello crea
 
 Docker empaqueta el software en unidades estandarizadas llamadas contenedores que incluyen todo lo necesario para que el software se ejecute: bibliotecas, herramientas de sistema, código, tiempo de ejecución, etc. 
 
-Docker se instala en cada servidor y proporciona comandos sencillos que puede utilizar para crear, iniciar o detener contenedores.
-
-Esto permite standarizar el despligue de la app, ya que Docker se encargara de la configuracion del servidor para el despligue del contenedor.
+Docker se instala en cada servidor y proporciona comandos sencillos que puede utilizar para crear, iniciar o detener contenedores. Esto permite standarizar el despligue de la app, ya que Docker se encargara de la configuracion del servidor para el despligue del contenedor.
 
 Para la creacion de un contenedor es necesario utilizar un Dockerfile, para nuestro caso:
 
@@ -395,23 +393,23 @@ Para la creacion de un contenedor es necesario utilizar un Dockerfile, para nues
 FROM python:3.11.3
 WORKDIR /app
 ```
-
 Primero le indico que utilice python y, luego, que nuestro directorio de trabajo sera `/app` 
 
+---
 ```Dockerfile
 COPY api/ ./api
 COPY model/model.pkl ./model/model.pkl
 COPY initializer.sh .
 ```
-
 Copiamos las carpetas y archivos que vamos a necesitar, el comando en `COPY [origen] [destino]`, el `.` estoy indicando que es en la raiz del contenedor.
 
+---
 ```Dockerfile
 RUN pip install -U pip && pip install -r ./api/requirements.txt
 ```
-
 Instalamos los paquetes necesarios en el contenedor.
 
+---
 ```Dockerfile
 RUN chmod +x initializer.sh
 ```
@@ -419,17 +417,13 @@ Para ejecutar lineas de comandos lo debo realizar mediante un archivo `.sh`. Par
 
 Tambien se puede escribir `a+x`, donde `a` indica que es a todos, pero al ser este el valor por defecto puede omitirse e indicar solamente `+x`
 
+---
 ```Dockerfile
 EXPOSE 8000
-```
 
-Habilito el puerto 8000 para comunicacion
-
-```Dockerfile
 ENTRYPOINT ["./initializer.sh"]
 ```
-
-Indico que el ejecutable que utilizara el contenedor es `./initializer.sh`, que sera el que despliegue la app.
+Habilito el puerto 8000 para comunicacion e indico que el ejecutable que utilizara el contenedor es `./initializer.sh`, que sera el que despliegue la app.
 
 * Crear un initializer.sh
 
@@ -453,7 +447,7 @@ gunicorn --bind 0.0.0.0 api.main:app -w 2 -k uvicorn.workers.UvicornWorker
 
 Se necesita una cuenta de DockerHub, ya que la docker image se carga ahi y desde ese lugar se sube a Koyeb. 
 
-Con la cuenta creada, se crea en GitHub los secrets: DOCKERHUB_USERNAME, username de la cuenta generada, y DOCKERHUB_TOKEN, token de acceso que se genera en `settings -> security -> New 
+Con la cuenta creada, se crea en GitHub los secrets: DOCKERHUB_USERNAME, username de la cuenta generada, y DOCKERHUB_TOKEN, el token de acceso que se genera en `settings -> security -> New 
 Access Tokens`. 
 
 Por ultimo se crea un repositorio, se genera la imagen y se sube.
@@ -462,7 +456,7 @@ Por ultimo se crea un repositorio, se genera la imagen y se sube.
 
 Se necesita una cuenta de koyeb para subir el contenedor docker y desplegar el servicio. La razon por la cual se eligio Koyeb es debido a que posee una parte gratuita que permite realizar pequeñas pruebas. Koyeb posee la opcion de implementar el servicio mediante GitHub, simplificando el despligue de la app, la cual no se utilizo para familiarizarse con el uso de Docker.
 
-Con la cuenta creada, se crea en GitHub el secrets KOYEB_TOKEN, token de acceso que se genera en: `account settings -> Personal access tokens`. Por ultimo se crea la app donde se desplegara el servicio, vamos a 'Create Web Service' y seguimos los pasos:
+Con la cuenta creada, se crea en GitHub el secrets KOYEB_TOKEN con el token de acceso, que se genera en: `account settings -> Personal access tokens`. Por ultimo se crea la app donde se desplegara el servicio, vamos a 'Create Web Service' y seguimos los pasos:
 
 
 1. Selececionamos el metodo de deploy, en este caso por Docker:
@@ -538,4 +532,4 @@ Cargamos y configuramos el CLI de Koyeb e indicamos que realice el redepoly del 
 
 Al finalizar la corrida del workflow, se vera en koyeb la actualizacion del servicio (toma unos minutos)
 
-![Service Redeploy](img/koyeb-deploy-3-1.png)
+![Service Redeploy](img/koyeb-redeploy.png)
