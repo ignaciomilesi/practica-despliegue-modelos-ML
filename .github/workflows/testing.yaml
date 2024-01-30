@@ -1,0 +1,30 @@
+name: Testeo de API
+on: 
+  push:
+    branches:
+      - workflow_testing_api
+jobs:
+  testing-api:
+    runs-on: ubuntu-latest
+    env:
+      GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
+    steps:
+      - name: Acceso al repositorio
+        uses: actions/checkout@v3
+
+      - name: Creando y activando un entorno virtual
+        run: |
+          pip3 install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+
+      - name: Instalando dependencias
+        run: |
+          pip install dvc[gdrive]
+          pip install -r api/requirements-app-test.txt
+          pip install --upgrade pyopenssl
+
+      - name: Traer el modelo y testeando la API
+        run: |
+          dvc pull model/model.pkl -r myremote
+          pytest api/test_main.py

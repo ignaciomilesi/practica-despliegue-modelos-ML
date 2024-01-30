@@ -1,0 +1,4 @@
+pandas==2.1.4
+scikit-learn==1.3.2
+dvc==3.39.0
+dvc[gdrive]

@@ -1,0 +1,75 @@
+name: Continuous Training
+on:
+  push:
+    branches:
+      - workflow_entrenamiento_continuo
+      - main
+  #schedule:
+  #  - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Motivo de la corrida
+        default: Actualizar modelo
+
+jobs:
+  continuous-training:
+    runs-on: ubuntu-latest
+    env:
+      GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
+      REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Acceso al repositorio
+        uses: actions/checkout@v3
+
+      - name: Actualizar a Node16
+        uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+
+      - name: Creando y activando un entorno virtual
+        run: |
+           pip3 install virtualenv
+           virtualenv venv
+           source venv/bin/activate
+      
+      - name: Instalando dependencias
+        run: |   
+           pip install -r src/requirements.txt
+           pip install --upgrade pyopenssl
+      
+      - name: Traer el modelo
+        run: |
+           dvc pull model/model.pkl.dvc -r myremote
+           dvc unprotect model/model.pkl
+      
+      - name: Actualizando Train model
+        run: |
+           dvc repro -f 
+           echo "Entrenamiento completo"
+
+      - name: Realizo el test para asegurar que todo esta correcto
+        run: |
+          pip install dvc[gdrive]
+          pip install -r api/requirements-app-test.txt
+          pytest api/test_main.py
+      
+      - name: Actualizando el dvc del Train model
+        run: |
+           dvc add model/model.pkl
+           dvc push
+      
+      - name: Commit y push de los cambios en el archivo .dvc 
+        run: |
+          git config --local user.email "ignacio_m_16@hotmail.com"
+          git config --local user.name "github-actions[bot]"
+          git add model/model.pkl.dvc
+          git commit -m "Updating model serialization"
+          git push
+
+      - uses: iterative/setup-cml@v1
+      - name: Agregado comentario con el reporte
+        run: |
+          cat report.txt >> report.md 
+          cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md
+         

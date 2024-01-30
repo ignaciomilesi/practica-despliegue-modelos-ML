@@ -1,1 +1,7 @@
+ent-*/
 *.csv
+*.pkl
+.dvc/dvc-key.json
+__pycache__/
+report.txt
+.pytest_cache

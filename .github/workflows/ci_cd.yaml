@@ -1,0 +1,60 @@
+name: Continuous Integration/Continuous Deployment
+on: 
+  push:
+    branches:
+      - workflow_CI-CD
+  workflow_run:
+    workflows: ["Continuous Training"]
+    branches: [main]
+    types:
+      - completed
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Motivo de la corrida
+        default: Actualizar modelo
+jobs:
+  ci_cd:
+    runs-on: ubuntu-latest
+    env:
+      GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_KEY }}
+    steps:
+      - name: Acceso al repositorio
+        uses: actions/checkout@v3
+      
+      - name: Creando y activando un entorno virtual
+        run: |
+          pip3 install virtualenv
+          virtualenv venv
+          source venv/bin/activate
+      
+      - name: Cargando el modelo
+        run: | 
+          pip install dvc[gdrive]
+          pip install --upgrade pyopenssl
+          dvc pull model/model.pkl -r myremote
+      
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Creamos la imagen y realizamos push al docker hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ignaciomilesi/practica-despliegue-modelos-ml:latest
+      
+      - name: Cargamos y configuramos el CLI de Koyeb
+        uses: koyeb-community/install-koyeb-cli@v2
+        with:
+          api_token: "${{ secrets.KOYEB_TOKEN }}"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+      
+      - name: Redeploy en el servidor koyeb
+        run: koyeb service redeploy prac-desp-model-ml/tree-survival-prediction     
+
+
+     
