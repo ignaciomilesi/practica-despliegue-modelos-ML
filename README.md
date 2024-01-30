@@ -215,7 +215,7 @@ GitHub Actions permite Automatizar y ejecutar flujos de trabajo directamente des
 
 YAML es un lenguaje de serialización de datos y suele utilizarse en el diseño de archivos de configuración. Es un lenguaje de programación popular porque está diseñado para que sea fácil de leer y entender, ya que, utilizan la sangría al estilo Python (aunque no admite tabulacion) para determinar la estructura e indicar la incorporación de un elemento de código dentro de otro.
 
-Analizando el testing.yaml generado para la configuracion de este workflow:
+El Workflow para el testeo (configurado en el testing.yaml) sera el encargado de realizar una descarga del ultimo modelo y ejecutar el test definido en api/test_main.py:
 
 ---
 ```yaml
@@ -310,9 +310,10 @@ Aca se puede ver, a la izquierda, "Testing API" que es el `name` que se habia co
 
 ## Workflow para el entrenamiento continuo
 
+Es el encargado de actualizar el modelo cada sierto tiempo; toma el dataset actualizado, realiza un nuevo entrenamiento, guarda el nuevo modelo para que se encuentre dsiponible para ser utilizado y genera un reporte con el nuevo score del modelo y lo adjunta al commit donde se actualizo. 
+
 La estructura es la misma que el workflow para el testeo de API, con un par de particularidades:
 
----
 ```yaml
 on:
   push:
@@ -367,14 +368,174 @@ Ejecuto `dvc repro -f` que, como ya se mostro, ejecuta lo indicado en el archivo
 
 `cml comment create --target=commit/$(git log  --pretty=format:'%h' -1) report.md` creo el comentario. 
 
-Por default el comentario se creara en el commit que desencadeno el workflow, que en este caso no es el mismo en el que se actualizo el modelo (eso se realiza en un commit posterior, generado por este workflow).
+Por default el comentario se creara en el commit que desencadeno el workflow, que en este caso no es el mismo en el que se actualizo el modelo (eso se realiza en un commit posterior, generado por el mismo workflow).
 
-Por ello es necesario indicar `--target=commit/$(git log  --pretty=format:'%h' -1)`, con el `git log ...` obtengo el hash del ultimo commit generado, el cual contiene el modelo actualizado y con el `--target=commit/` le indico que el comentario lo realice en ese commit
+Por ello es necesario indicar `--target=commit/$(git log  --pretty=format:'%h' -1)`, con el `git log ...` obtengo el hash del ultimo commit generado y con el `--target=commit/` le indico que el comentario lo realice en ese commit
 
 El commit donde se actualiza el modelo con el comentario indicando el reporte del mismo se ve de la siguiente manera:
 
 ![Commit con el modelo actualizado](img/comit-modelo-actualizado.png)
 
 
+## Workflow para el despliegue e integracion continuos
 
-Hay que tener encuenta un par de cosas: * Se necesita cuenta de Docker HUB, ya que la docker image se carga ahi y desde ese lugar se sube a Koyeb. Y se necesita crear los ${{ secrets.DOCKERHUB\_USERNAME }} y ${{ secrets.DOCKERHUB\_TOKEN }} con los datos de la cuenta * Se necesita cuenta en Koyeb y generar el ${{ secrets.KOYEB\_TOKEN }} con el token de la cuenta * En la ultima linea, el app\_name/service\_name, son los nombres del servicio creado en Koyeb
+Es el encargado de tomar el nuevo modelo y desplegar el servicio. Para ello creara una docker image y la subira a Koyeb para la generacion de una app, en donde, se podra realizar predicciones del modelo. Para ello hay que realizar unos pasos previos:
+
+* Crear un Dockerfile
+
+Docker empaqueta el software en unidades estandarizadas llamadas contenedores que incluyen todo lo necesario para que el software se ejecute: bibliotecas, herramientas de sistema, código, tiempo de ejecución, etc. 
+
+Docker se instala en cada servidor y proporciona comandos sencillos que puede utilizar para crear, iniciar o detener contenedores.
+
+Esto permite standarizar el despligue de la app, ya que Docker se encargara de la configuracion del servidor para el despligue del contenedor.
+
+Para la creacion de un contenedor es necesario utilizar un Dockerfile, para nuestro caso:
+
+```Dockerfile
+FROM python:3.11.3
+WORKDIR /app
+```
+
+Primero le indico que utilice python y, luego, que nuestro directorio de trabajo sera `/app` 
+
+```Dockerfile
+COPY api/ ./api
+COPY model/model.pkl ./model/model.pkl
+COPY initializer.sh .
+```
+
+Copiamos las carpetas y archivos que vamos a necesitar, el comando en `COPY [origen] [destino]`, el `.` estoy indicando que es en la raiz del contenedor.
+
+```Dockerfile
+RUN pip install -U pip && pip install -r ./api/requirements.txt
+```
+
+Instalamos los paquetes necesarios en el contenedor.
+
+```Dockerfile
+RUN chmod +x initializer.sh
+```
+Para ejecutar lineas de comandos lo debo realizar mediante un archivo `.sh`. Para que esto pueda realizarse necesito realizar, con `RUN chmod`, una asignación de permisos de acceso: `+x` indica que se le agregue (indicado mendiante el `+`) a todos los ususarios permisos de ejecucion (indicado mendiante el `x`) del archivo `initializer.sh`. 
+
+Tambien se puede escribir `a+x`, donde `a` indica que es a todos, pero al ser este el valor por defecto puede omitirse e indicar solamente `+x`
+
+```Dockerfile
+EXPOSE 8000
+```
+
+Habilito el puerto 8000 para comunicacion
+
+```Dockerfile
+ENTRYPOINT ["./initializer.sh"]
+```
+
+Indico que el ejecutable que utilizara el contenedor es `./initializer.sh`, que sera el que despliegue la app.
+
+* Crear un initializer.sh
+
+Es el ejecutable que utilizara el contenedor Docker para el despliegue de la app, lo realiza mediante Gunicorn:
+
+```
+#!/bin/bash 
+
+gunicorn --bind 0.0.0.0 api.main:app -w 2 -k uvicorn.workers.UvicornWorker 
+```
+
+`#!/bin/bash`: se agrega como primera linea para asegurar la compativilidad.
+
+`-–bind 0.0.0.0` = definimos la ip
+
+`-w` = Es el número de workers. Un worker gestiona una solicitud y la responde al cliente
+
+`-k` = define el tipo de workers
+
+* Crear una cuenta en DockerHub
+
+Se necesita una cuenta de DockerHub, ya que la docker image se carga ahi y desde ese lugar se sube a Koyeb. 
+
+Con la cuenta creada, se crea en GitHub los secrets: DOCKERHUB_USERNAME, username de la cuenta generada, y DOCKERHUB_TOKEN, token de acceso que se genera en `settings -> security -> New 
+Access Tokens`. 
+
+Por ultimo se crea un repositorio, se genera la imagen y se sube.
+
+* Crear una cuenta en Koyeb
+
+Se necesita una cuenta de koyeb para subir el contenedor docker y desplegar el servicio. La razon por la cual se eligio Koyeb es debido a que posee una parte gratuita que permite realizar pequeñas pruebas. Koyeb posee la opcion de implementar el servicio mediante GitHub, simplificando el despligue de la app, la cual no se utilizo para familiarizarse con el uso de Docker.
+
+Con la cuenta creada, se crea en GitHub el secrets KOYEB_TOKEN, token de acceso que se genera en: `account settings -> Personal access tokens`. Por ultimo se crea la app donde se desplegara el servicio, vamos a 'Create Web Service' y seguimos los pasos:
+
+
+1. Selececionamos el metodo de deploy, en este caso por Docker:
+![Koyeb deploy 1](img/koyeb-deploy-1.png)
+
+
+2. Indicamos la direccion de la Docker Image, ubicada en Docker Hub, con su tag:
+![Koyeb deploy 2](img/koyeb-deploy-2.png)
+
+El tag, palabras clave para categorizar contenido, se define al subir la docker image
+
+![Docker Tag](img/docker-tag.png)
+
+3. Indicamos el nombre del servicio y el tipo:
+![Koyeb deploy 3-1](img/koyeb-deploy-3-1.png)
+La region donde se despliega
+![Koyeb deploy 3-2](img/koyeb-deploy-3-2.png)
+Y el nombre de la app
+![Koyeb deploy 3-3](img/koyeb-deploy-3-3.png)
+
+Con esto queda el servicio desplegado, en la informacion del mismo, se tiene la URL publica
+![Koyeb Service OK](img/koyeb-service-ok.png)
+
+Que al dirgirnos a esta, vemos la interface de FastAPI para realizar consultas
+![Service Desplegado](img/service-desplegado.png)
+
+* Workflow en GitHub Actions
+
+Con el servicio desplegado generamos el Workflow en GitHub Actions para la actualizacion continua del mismo. La estructura es la misma que los dos workflow anteriores, por lo que solo comentare las correspondientes a la tarea especifica de este workflow :
+
+```yaml
+on: 
+  workflow_run:
+    workflows: ["Continuous Training"]
+    branches: [main]
+    types:
+      - completed
+```
+`workflow_run` permite ejecutar el workflow en funcion de otro que se este ejecutanto. Para este caso, este workflows se ejecutara cuando el `workflows ["Continuous Training"]`, que se esta ejecutando en la rama `[main]` se encuentre completado(`completed`).
+
+Recordemos que el 'Continuous Training' es el encargado de reentrenar el modelo con el nuevo dataset y generar una actualizacion del mismo. Cuando ese workflow concluya comensara a correr este que los desplegara en el servicio de Koyeb
+
+---
+```yaml     
+      - name: Docker login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Creamos la imagen y realizamos push al docker hub
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ignaciomilesi/practica-despliegue-modelos-ml:latest
+```
+Nos logeamos en Docker Hub, creamos y pusheamos la imagen. En 'tag' es necesario indicar la direccion del contenedor con su tag correspondiente, posee la forma `usuario/nombreContenedor:tag` 
+
+---
+```yaml
+      - name: Cargamos y configuramos el CLI de Koyeb
+        uses: koyeb-community/install-koyeb-cli@v2
+        with:
+          api_token: "${{ secrets.KOYEB_TOKEN }}"
+          github_token: "${{ secrets.GITHUB_TOKEN }}"
+      
+      - name: Redeploy en el servidor koyeb
+        run: koyeb service redeploy prac-desp-model-ml/tree-survival-prediction   
+```
+
+Cargamos y configuramos el CLI de Koyeb e indicamos que realice el redepoly del servicio (ira al contenedor del Docker Hub y desplegara la nueva imagen). Se debe indicar el nombre de la app y el servicio (con la forma `nombreApp/nombreService`) definidos al momento de la creacion del web service.
+
+Al finalizar la corrida del workflow, se vera en koyeb la actualizacion del servicio (toma unos minutos)
+
+![Service Redeploy](img/koyeb-deploy-3-1.png)
